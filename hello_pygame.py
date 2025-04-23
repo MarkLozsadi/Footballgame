@@ -3,26 +3,20 @@ import pygame
 def main():
     # Initialize Pygame
     pygame.init()
-    
+    clock = pygame.time.Clock()
+
     # Create window: width × height
     screen = pygame.display.set_mode((800, 600))
     pygame.display.set_caption("Mark's Football game!")
     
     footballField = pygame.image.load("images/footballField.png").convert()
     footballField = pygame.transform.scale(footballField, (800,600))
-    p1 = pygame.image.load("images/Ronaldo.png").convert_alpha()
-    p1 = pygame.transform.scale(p1, (80,80))
-    p2 = pygame.image.load("images/Messi.png").convert_alpha()
-    p2 = pygame.transform.scale(p2,(80,80))
-   
-    p1_x = 100
-    p1_y = 100
-    p2_x = 400
-    p2_y = 400
-    p1_cx = p1.get_rect().center[0]
-    p1_cy = p1.get_rect().center[1]
-    p2_cx = p2.get_rect().center[0]
-    p2_cy = p2.get_rect().center[1]
+    
+    p1 = Player("images/Ronaldo.png", (100, 100), (80,80))
+    p2 = Player("images/Messi.png",   (400, 400), (80,80))
+    
+    sprites = pygame.sprite.Group(p1, p2)
+    screen.blit(footballField, (0,0))
 
     # Main loop control flag
     running = True
@@ -33,20 +27,19 @@ def main():
                 running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RIGHT:
-                    p1_x += 10
+                    p1.rect.x += p1.speed
                 elif event.key == pygame.K_LEFT:
-                    p1_x -= 10
+                    p1.rect.x -= p1.speed
                 elif event.key == pygame.K_UP:
-                    p1_y -= 10
+                    p1.rect.y -= p1.speed
                 elif event.key == pygame.K_DOWN:
-                    p1_y += 10
+                    p1.rect.y += p1.speed
         
         
-        screen.blit(footballField, (0,0))  
-        p1_center = ((p1_x + p1_cx), (p1_y + p1_cy))
-        update_sprite(footballField, p1, p1_center, 45, )
-        footballField.blit(p2, (p2_x, p2_y))    
-
+        dt = clock.tick(15) / 1000.0 # to get seconds
+        sprites.clear(screen, footballField)
+        sprites.update(dt)
+        sprites.draw(screen)
 
         # Update the display
         pygame.display.flip()
@@ -66,6 +59,24 @@ def update_sprite(target_surf, image_surf, center_pos, angle):
     new_rect = rotated_image.get_rect(center=center_pos)
     # Blit to screen.
     target_surf.blit(rotated_image, new_rect)
+
+class Player(pygame.sprite.Sprite):
+    def __init__(self, image_path, pos, resize=(0,0)):
+        super().__init__()  # initialize the base Sprite
+        # load and store the image
+        self.image = pygame.image.load(image_path).convert_alpha()
+        if (resize != (0,0)):
+            self.image = pygame.transform.scale(self.image, resize)
+        # create a rect for positioning
+        self.rect = self.image.get_rect(center=pos)
+        self.angle = 0
+        self.speed = 4
+
+    def update(self, dt):
+        # called once per frame; dt is the time since last frame
+        # e.g. move right at 100 pixels/sec:
+        #self.rect.x += 10 * dt
+        pass
 
 
 if __name__ == "__main__":
