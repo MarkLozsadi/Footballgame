@@ -21,6 +21,10 @@ def main():
     ball = Ball("images/ball.png", (screen.get_rect().centerx, screen.get_rect().centery))
 
     sprites = pygame.sprite.Group(p1, p2, ball)
+
+    p1.setOtherSprites(sprites)
+    p2.setOtherSprites(sprites)
+
     screen.blit(footballField, (0,0))
 
     # Main loop control flag

@@ -1,5 +1,5 @@
 import pygame  
-
+from Ball import Ball
 class Player(pygame.sprite.Sprite):
     sizeX = 80
     sizeY = 80
@@ -11,29 +11,44 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.transform.smoothscale(self.image, (Player.sizeX, Player.sizeY))
         # create a rect for positioning
         self.rect = self.image.get_rect(center=pos)
-        self.speed = 150
+        self.speed = 150.0
         self.leftKey  = pygame.K_LEFT
         self.rightKey = pygame.K_RIGHT
         self.upKey    = pygame.K_UP 
         self.downKey  = pygame.K_DOWN
+        self.others   = []
+        self.movement = pygame.Vector2(0, 0)
 
 
     def update(self, dt):
-        movement = pygame.Vector2(0, 0)
+        self.movement = pygame.Vector2(0, 0)
         keys = pygame.key.get_pressed()
-        if (keys[self.leftKey]):  movement.x -= 1
-        if (keys[self.rightKey]): movement.x += 1
-        if (keys[self.upKey]):    movement.y -= 1
-        if (keys[self.downKey]):  movement.y += 1
+        if (keys[self.leftKey]):  self.movement.x -= 1
+        if (keys[self.rightKey]): self.movement.x += 1
+        if (keys[self.upKey]):    self.movement.y -= 1
+        if (keys[self.downKey]):  self.movement.y += 1
 
         # normalize diagonal movement
-        if movement.x != 0 and movement.y != 0:
-            movement = movement.normalize()
+        if self.movement.x != 0 and self.movement.y != 0:
+            self.movement = self.movement.normalize()
         
-        self.rect.move_ip(movement * self.speed * dt)
+        self.handle_collisions()
+        self.rect.move_ip(self.movement * self.speed * dt)
+
 
     def setKeys(self, up, down, left, right):
         self.upKey    = up
         self.downKey  = down
         self.leftKey  = left
         self.rightKey = right
+    
+    def setOtherSprites(self, spriteGroup):
+        self.others = spriteGroup
+
+    def handle_collisions(self):
+        # Player vs. Enemies
+        for sp in pygame.sprite.spritecollide(self, self.others, dokill=False):
+            if (isinstance(sp, Player)):
+                self.movement = (0,0)
+            elif (isinstance(sp, Ball)):
+                pass
