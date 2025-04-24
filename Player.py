@@ -1,15 +1,16 @@
 import pygame  
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, image_path, pos, resize=(0,0)):
+    sizeX = 80
+    sizeY = 80
+
+    def __init__(self, image_path, pos):
         super().__init__()  # initialize the base Sprite
         # load and store the image
         self.image = pygame.image.load(image_path).convert_alpha()
-        if (resize != (0,0)):
-            self.image = pygame.transform.scale(self.image, resize)
+        self.image = pygame.transform.smoothscale(self.image, (Player.sizeX, Player.sizeY))
         # create a rect for positioning
         self.rect = self.image.get_rect(center=pos)
-        self.angle = 0
         self.speed = 150
         self.leftKey  = pygame.K_LEFT
         self.rightKey = pygame.K_RIGHT

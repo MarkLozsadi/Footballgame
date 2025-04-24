@@ -1,5 +1,6 @@
 import pygame
 from Player import Player
+from Ball import Ball
 
 def main():
     # Initialize Pygame
@@ -13,11 +14,13 @@ def main():
     footballField = pygame.image.load("images/footballField.png").convert()
     footballField = pygame.transform.scale(footballField, (800,600))
     
-    p1 = Player("images/Ronaldo.png", (100, 100), (80,80))
-    p2 = Player("images/Messi.png",   (400, 400), (80,80))
+    p1 = Player("images/Ronaldo.png", (100, 100))
+    p2 = Player("images/Messi.png",   (400, 400))
     p2.setKeys(pygame.K_w, pygame.K_s, pygame.K_a, pygame.K_d)
 
-    sprites = pygame.sprite.Group(p1, p2)
+    ball = Ball("images/ball.png", (screen.get_rect().centerx, screen.get_rect().centery))
+
+    sprites = pygame.sprite.Group(p1, p2, ball)
     screen.blit(footballField, (0,0))
 
     # Main loop control flag
