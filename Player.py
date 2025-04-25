@@ -1,8 +1,8 @@
 import pygame  
 from Ball import Ball
 class Player(pygame.sprite.Sprite):
-    sizeX = 80
-    sizeY = 80
+    sizeX = 60
+    sizeY = 82
 
     def __init__(self, image_path, pos):
         super().__init__()  # initialize the base Sprite
@@ -16,7 +16,7 @@ class Player(pygame.sprite.Sprite):
         self.rightKey = pygame.K_RIGHT
         self.upKey    = pygame.K_UP 
         self.downKey  = pygame.K_DOWN
-        self.others   = []
+        self.others   = pygame.sprite.Group()
         self.movement = pygame.Vector2(0, 0)
 
 
@@ -32,8 +32,12 @@ class Player(pygame.sprite.Sprite):
         if self.movement.x != 0 and self.movement.y != 0:
             self.movement = self.movement.normalize()
         
+        self.movement.x *= self.speed * dt
+        self.movement.y *= self.speed * dt
+
         self.handle_collisions()
-        self.rect.move_ip(self.movement * self.speed * dt)
+        self.move()
+        
 
 
     def setKeys(self, up, down, left, right):
@@ -42,13 +46,38 @@ class Player(pygame.sprite.Sprite):
         self.leftKey  = left
         self.rightKey = right
     
-    def setOtherSprites(self, spriteGroup):
-        self.others = spriteGroup
+    def setOtherSprites(self, sprites:pygame.sprite.Group):
+        self.others = sprites.copy()
+        self.others.remove(self)
 
     def handle_collisions(self):
         # Player vs. Enemies
         for sp in pygame.sprite.spritecollide(self, self.others, dokill=False):
-            if (isinstance(sp, Player)):
-                self.movement = (0,0)
+            if sp is self:
+                continue
             elif (isinstance(sp, Ball)):
                 pass
+    
+    def move(self):
+        # 1) Try the X move
+        if (self.movement.x != 0):
+            new_rect = self.rect.move(self.movement.x, 0)  # create a “would‐be” rect
+            for sp in pygame.sprite.spritecollide(self._make_temp_sprite(new_rect), self.others, dokill=False):
+                if isinstance(sp, Ball):
+                    continue
+                self.movement.x = 0  # X‐movement blocked: zero it out
+
+        # 2) Try the Y move
+        if (self.movement.y != 0):
+            new_rect = self.rect.move(0, self.movement.y)
+            for sp in pygame.sprite.spritecollide(self._make_temp_sprite(new_rect), self.others, dokill=False):
+                if isinstance(sp, Ball):
+                    continue
+                self.movement.y = 0  # y‐movement blocked: zero it out
+        self.rect.move_ip(self.movement)
+
+    def _make_temp_sprite(self, rect):
+        """Helper to wrap a rect in something spritecollide can use."""
+        temp = pygame.sprite.Sprite()
+        temp.rect = rect
+        return temp
