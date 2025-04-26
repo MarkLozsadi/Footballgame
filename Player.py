@@ -6,6 +6,8 @@ class Player(pygame.sprite.Sprite):
     sizeX = 60
     sizeY = 82
 
+    hasBallSpeedFactor = 0.8
+
     def __init__(self, image_path, pos):
         super().__init__()  # initialize the base Sprite
         # load and store the image
@@ -22,7 +24,6 @@ class Player(pygame.sprite.Sprite):
         self.movement = pygame.Vector2(0, 0)
         self.mask     = pygame.mask.from_surface(self.image)
 
-
     def update(self, dt):
         self.movement = pygame.Vector2(0, 0)
         keys = pygame.key.get_pressed()
@@ -38,11 +39,8 @@ class Player(pygame.sprite.Sprite):
         self.movement.x *= self.speed * dt
         self.movement.y *= self.speed * dt
 
-        self.handle_collisions()
         self.move()
         
-
-
     def setKeys(self, up, down, left, right):
         self.upKey    = up
         self.downKey  = down
@@ -52,40 +50,26 @@ class Player(pygame.sprite.Sprite):
     def setOtherSprites(self, sprites:pygame.sprite.Group):
         self.others = sprites.copy()
         self.others.remove(self)
+               
 
-    def handle_collisions(self):
-        # Player vs. Enemies
-        for sp in pygame.sprite.spritecollide(self, self.others, dokill=False):
-            if sp is self:
-                continue
-            elif (isinstance(sp, Ball)):
-                pass
-    
     def move(self):
-        # 1) Try the X move
-        if (self.movement.x != 0):
+        ballNeedToMove = False
+        ball = None
+        if (self.movement.x != 0 or self.movement.y != 0):
             clone = self.shallow_clone()
-            clone.rect.move_ip(self.movement.x, 0)  # create a “would‐be” rect
+            clone.rect.move_ip(self.movement.x, self.movement.y)  # create a “would‐be” rect
             for sp in pygame.sprite.spritecollide(clone, self.others, dokill=False, collided=pygame.sprite.collide_mask):
                 if isinstance(sp, Ball):
-                    continue
-                self.movement.x = 0  # X‐movement blocked: zero it out
+                    ballNeedToMove = True
+                    ball = sp
+                else:
+                    self.movement.x = 0  # X‐movement blocked: zero it out
+                    self.movement.y = 0  # Y‐movement blocked: zero it out
+            if (ballNeedToMove):
+                self.movement *= self.hasBallSpeedFactor
+                ball.rect.move_ip(self.movement.x, self.movement.y)
 
-        # 2) Try the Y move
-        if (self.movement.y != 0):
-            clone = self.shallow_clone()
-            clone.rect.move_ip(self.movement.y, 0)  # create a “would‐be” rect
-            for sp in pygame.sprite.spritecollide(clone, self.others, dokill=False, collided=pygame.sprite.collide_mask):
-                if isinstance(sp, Ball):
-                    continue
-                self.movement.y = 0  # y‐movement blocked: zero it out
         self.rect.move_ip(self.movement)
-
-    def _make_temp_moved_sprite(self, rect, x, y):
-        
-        temp = copy.deepcopy()
-        temp.rect = rect
-        return temp
     
     def shallow_clone(self):
         new = copy.copy(self)                # copies the object, but references same image/rect/etc

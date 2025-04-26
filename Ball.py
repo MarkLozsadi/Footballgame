@@ -1,8 +1,8 @@
 import pygame
 
 class Ball(pygame.sprite.Sprite):
-    sizeX = 24
-    sizeY = 24
+    sizeX = 32
+    sizeY = 32
     
     def __init__(self, image_path, pos):
         super().__init__()  # initialize the base Sprite
