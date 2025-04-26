@@ -16,7 +16,7 @@ def main():
     
     p1 = Player("images/Ronaldo.png", (100, 100))
     p2 = Player("images/Messi.png",   (400, 400))
-    p2.setKeys(pygame.K_w, pygame.K_s, pygame.K_a, pygame.K_d)
+    p2.setKeys(pygame.K_w, pygame.K_s, pygame.K_a, pygame.K_d, pygame.K_SPACE)
 
     ball = Ball("images/ball.png", (screen.get_rect().centerx, screen.get_rect().centery))
 

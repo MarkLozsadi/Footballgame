@@ -20,9 +20,11 @@ class Player(pygame.sprite.Sprite):
         self.rightKey = pygame.K_RIGHT
         self.upKey    = pygame.K_UP 
         self.downKey  = pygame.K_DOWN
+        self.shootKey = pygame.K_RCTRL
         self.others   = pygame.sprite.Group()
         self.movement = pygame.Vector2(0, 0)
         self.mask     = pygame.mask.from_surface(self.image)
+        self.wantToShoot = False
 
     def update(self, dt):
         self.movement = pygame.Vector2(0, 0)
@@ -31,6 +33,7 @@ class Player(pygame.sprite.Sprite):
         if (keys[self.rightKey]): self.movement.x += 1
         if (keys[self.upKey]):    self.movement.y -= 1
         if (keys[self.downKey]):  self.movement.y += 1
+        if (keys[self.shootKey]): self.wantToShoot = True
 
         # normalize diagonal movement
         if self.movement.x != 0 and self.movement.y != 0:
@@ -40,18 +43,19 @@ class Player(pygame.sprite.Sprite):
         self.movement.y *= self.speed * dt
 
         self.move()
+        self.wantToShoot = False
         
-    def setKeys(self, up, down, left, right):
+    def setKeys(self, up, down, left, right, shoot):
         self.upKey    = up
         self.downKey  = down
         self.leftKey  = left
         self.rightKey = right
+        self.shootKey = shoot
     
     def setOtherSprites(self, sprites:pygame.sprite.Group):
         self.others = sprites.copy()
         self.others.remove(self)
                
-
     def move(self):
         ballNeedToMove = False
         ball = None
@@ -66,8 +70,11 @@ class Player(pygame.sprite.Sprite):
                     self.movement.x = 0  # X‐movement blocked: zero it out
                     self.movement.y = 0  # Y‐movement blocked: zero it out
             if (ballNeedToMove):
-                self.movement *= self.hasBallSpeedFactor
-                ball.rect.move_ip(self.movement.x, self.movement.y)
+                if (self.wantToShoot):
+                    ball.shot(self.movement.x, self.movement.y)
+                else:
+                    self.movement *= self.hasBallSpeedFactor
+                    ball.rect.move_ip(self.movement.x, self.movement.y)
 
         self.rect.move_ip(self.movement)
     
