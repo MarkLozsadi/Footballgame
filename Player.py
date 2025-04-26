@@ -1,5 +1,7 @@
 import pygame  
 from Ball import Ball
+import copy
+
 class Player(pygame.sprite.Sprite):
     sizeX = 60
     sizeY = 82
@@ -18,6 +20,7 @@ class Player(pygame.sprite.Sprite):
         self.downKey  = pygame.K_DOWN
         self.others   = pygame.sprite.Group()
         self.movement = pygame.Vector2(0, 0)
+        self.mask     = pygame.mask.from_surface(self.image)
 
 
     def update(self, dt):
@@ -61,23 +64,33 @@ class Player(pygame.sprite.Sprite):
     def move(self):
         # 1) Try the X move
         if (self.movement.x != 0):
-            new_rect = self.rect.move(self.movement.x, 0)  # create a “would‐be” rect
-            for sp in pygame.sprite.spritecollide(self._make_temp_sprite(new_rect), self.others, dokill=False):
+            clone = self.shallow_clone()
+            clone.rect.move_ip(self.movement.x, 0)  # create a “would‐be” rect
+            for sp in pygame.sprite.spritecollide(clone, self.others, dokill=False, collided=pygame.sprite.collide_mask):
                 if isinstance(sp, Ball):
                     continue
                 self.movement.x = 0  # X‐movement blocked: zero it out
 
         # 2) Try the Y move
         if (self.movement.y != 0):
-            new_rect = self.rect.move(0, self.movement.y)
-            for sp in pygame.sprite.spritecollide(self._make_temp_sprite(new_rect), self.others, dokill=False):
+            clone = self.shallow_clone()
+            clone.rect.move_ip(self.movement.y, 0)  # create a “would‐be” rect
+            for sp in pygame.sprite.spritecollide(clone, self.others, dokill=False, collided=pygame.sprite.collide_mask):
                 if isinstance(sp, Ball):
                     continue
                 self.movement.y = 0  # y‐movement blocked: zero it out
         self.rect.move_ip(self.movement)
 
-    def _make_temp_sprite(self, rect):
-        """Helper to wrap a rect in something spritecollide can use."""
-        temp = pygame.sprite.Sprite()
+    def _make_temp_moved_sprite(self, rect, x, y):
+        
+        temp = copy.deepcopy()
         temp.rect = rect
         return temp
+    
+    def shallow_clone(self):
+        new = copy.copy(self)                # copies the object, but references same image/rect/etc
+        #new.image = sprite.image.copy()        # now give it its own Surface
+        new.rect  = self.rect.copy()         # and its own Rect
+        new.mask  = self.mask.copy()         # and its own Mask
+        # copy other mutable attrs as needed…
+        return new
