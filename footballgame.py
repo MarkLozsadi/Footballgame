@@ -1,6 +1,7 @@
 import pygame
 from Player import Player
 from Ball import Ball
+from Net import Net
 
 def main():
     # Initialize Pygame
@@ -17,13 +18,16 @@ def main():
     p1 = Player("images/Ronaldo.png", (100, 100))
     p2 = Player("images/Messi.png",   (400, 400))
     p2.setKeys(pygame.K_w, pygame.K_s, pygame.K_a, pygame.K_d, pygame.K_SPACE)
-
     ball = Ball("images/ball.png", (screen.get_rect().centerx, screen.get_rect().centery))
+    leftNet  = Net("left")
+    rightNet = Net("right")
 
-    sprites = pygame.sprite.Group(p1, p2, ball)
-
+    sprites = pygame.sprite.Group(p1, p2, ball, leftNet, rightNet)
+    
     p1.setOtherSprites(sprites)
     p2.setOtherSprites(sprites)
+    leftNet.setOtherSprites(sprites)
+    rightNet.setOtherSprites(sprites)
 
     screen.blit(footballField, (0,0))
 

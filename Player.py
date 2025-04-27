@@ -3,8 +3,8 @@ from Ball import Ball
 import copy
 
 class Player(pygame.sprite.Sprite):
-    sizeX = 60
-    sizeY = 82
+    sizeX = 30
+    sizeY = 41
 
     hasBallSpeedFactor = 0.8
 

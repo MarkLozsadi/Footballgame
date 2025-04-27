@@ -1,8 +1,8 @@
 import pygame
 
 class Ball(pygame.sprite.Sprite):
-    sizeX = 32
-    sizeY = 32
+    sizeX = 14
+    sizeY = 14
     shotSpeed = 300
     deceleration = 8
     
@@ -17,8 +17,20 @@ class Ball(pygame.sprite.Sprite):
         self.movement.x = 0
         self.movement.y = 0
         self.actualSpeed = 0
+        self.mask = pygame.mask.from_surface(self.image)
+        self.startX = pos[0]
+        self.startY = pos[1]
+        self.resetWanted = False
 
     def update(self, dt):
+        if (self.resetWanted):
+            self.rect.move(self.startX, self.startY)
+            self.actualSpeed = 0
+            self.movement.x = 0
+            self.movement.y = 0
+            self.resetWanted = False
+            return
+
         # normalize diagonal movement
         if (self.movement.x != 0 or self.movement.y != 0):
             self.movement = self.movement.normalize()
@@ -36,5 +48,9 @@ class Ball(pygame.sprite.Sprite):
             self.actualSpeed = 0
             self.movement.x = 0
             self.movement.y = 0
+    
+    def resetBall(self):
+        self.resetWanted = True
+        
 
         
