@@ -6,7 +6,7 @@ class Player(pygame.sprite.Sprite):
     sizeX = 30
     sizeY = 41
 
-    hasBallSpeedFactor = 0.8
+    hasBallSpeedFactor = 0.7
 
     def __init__(self, image_path, pos):
         super().__init__()  # initialize the base Sprite

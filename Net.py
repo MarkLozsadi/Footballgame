@@ -27,6 +27,7 @@ class Net(pygame.sprite.Sprite):
         self.others = []
         self.goalCounter = 0
         self.BallPartiallyIn = False
+        self.label = None
 
     def update(self, dt):
         for sp in pygame.sprite.spritecollide(self, self.others, dokill=False):
@@ -35,6 +36,7 @@ class Net(pygame.sprite.Sprite):
                     self.goalCounter += 1
                     sp.resetBall()
                     self.BallPartiallyIn = False
+                    self.updateLabel()
                 self.checkBallCollisionToNet(sp)
 
     def setOtherSprites(self, sprites:pygame.sprite.Group):
@@ -50,7 +52,6 @@ class Net(pygame.sprite.Sprite):
                 # → we overlapped more vertically than horizontally,
                 #    so it’s a left/right “side” collision
                 elif (ball.rect.centerx < self.rect.centerx):
-
                     # Hit the net’s left side!
                     if (self.side == "left"):
                         ball.rect.x = Net.leftPosX - ball.sizeX
@@ -91,4 +92,9 @@ class Net(pygame.sprite.Sprite):
             return True  
         return False
     
+    def setGoalCounterLabel(self, label:pygame.sprite.Sprite):
+        self.label = label
     
+    def updateLabel(self):
+        if (self.label is not None):
+            self.label.set(self.label.initialText + str(self.goalCounter))
